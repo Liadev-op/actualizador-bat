@@ -11,7 +11,7 @@ set "TEMP_FILE=%TEMP%\actualizacion_redes.bat"
 
 echo Verificando actualizaciones...
 
-:: Descargar archivo desde GitHub en texto plano
+:: Descargar archivo desde GitHub con codificación segura
 powershell -NoProfile -ExecutionPolicy Bypass -Command ^
 "try { ^
     $content = Invoke-WebRequest -Uri '%UPDATE_URL%' -UseBasicParsing -ErrorAction Stop; ^
@@ -20,10 +20,17 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command ^
     Write-Host '[ERROR] No se pudo descargar el archivo actualizado.'; exit 1 ^
 }"
 
-:: Verificar que el archivo descargado tenga contenido válido
+:: Verificar que se descargó correctamente
+if not exist "%TEMP_FILE%" (
+    echo [ERROR] No se pudo guardar el archivo descargado.
+    timeout /t 3 >nul
+    goto :Continue
+)
+
+:: Validar que tenga al menos la función :MapDrive
 findstr /B /C:":MapDrive" "%TEMP_FILE%" >nul
 if errorlevel 1 (
-    echo [ERROR] El archivo descargado no contiene funciones válidas.
+    echo [ERROR] El archivo descargado no parece ser válido (falta :MapDrive).
     del "%TEMP_FILE%" >nul 2>&1
     timeout /t 3 >nul
     goto :Continue
