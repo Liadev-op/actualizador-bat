@@ -98,15 +98,23 @@ set "USER=%~3"
 set "PASS=%~4"
 
 echo Mapeando %DRIVE% -> %SHARE% ...
-net use %DRIVE% %SHARE% %PASS% /user:%USER% /persistent:yes >nul 2>&1
-if %ERRORLEVEL% neq 0 (
+
+:: Ejecutar el comando y capturar salida
+net use %DRIVE% %SHARE% %PASS% /user:%USER% /persistent:yes >"%TEMP%\netuse_output.txt" 2>&1
+set "ERRORCODE=%ERRORLEVEL%"
+
+if %ERRORCODE% neq 0 (
     echo [ERROR] No se pudo mapear %DRIVE% (%SHARE%)
+    type "%TEMP%\netuse_output.txt"
     set "FAILED_DRIVES=!FAILED_DRIVES! %DRIVE%"
 ) else (
     echo [OK] %DRIVE% mapeado correctamente.
     set "SUCCESS_DRIVES=!SUCCESS_DRIVES! %DRIVE%"
 )
+
+del "%TEMP%\netuse_output.txt" >nul 2>&1
 exit /b
+
 
 :InputPassword
 set "psCommand=powershell -Command "$pword = read-host '%~1' -AsSecureString ; ^
