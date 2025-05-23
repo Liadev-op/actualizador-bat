@@ -5,23 +5,26 @@ Mode 80,20 & Color 0A
 cls
 
 :: ------------------------- CONFIGURACIÓN DE ACTUALIZACIÓN -------------------------
-:: URL RAW directa del archivo en GitHub
 set "UPDATE_URL=https://raw.githubusercontent.com/Liadev-op/actualizador-bat/main/REDES.bat"
 set "LOCAL_FILE=%~f0"
 set "TEMP_FILE=%TEMP%\actualizacion_redes.bat"
 
-:: Descargar nueva versión del script a archivo temporal
 echo Verificando actualizaciones...
-powershell -Command "try { Invoke-WebRequest -Uri '%UPDATE_URL%' -OutFile '%TEMP_FILE%' -UseBasicParsing -ErrorAction Stop } catch { Write-Host '[ERROR] No se pudo descargar la nueva versión.'; exit 1 }"
 
-:: Validar que se haya descargado correctamente
-if not exist "%TEMP_FILE%" (
-    echo [ERROR] No se pudo descargar el archivo actualizado.
-    timeout /t 5 >nul
+:: Descargar archivo desde GitHub en texto plano
+powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+    "try { (Invoke-WebRequest -Uri '%UPDATE_URL%' -UseBasicParsing).Content | Set-Content -Path '%TEMP_FILE%' -Encoding ASCII } catch { Write-Host '[ERROR] No se pudo descargar el archivo'; exit 1 }"
+
+:: Verificar que el archivo descargado tenga contenido válido
+findstr /B /C:":MapDrive" "%TEMP_FILE%" >nul
+if errorlevel 1 (
+    echo [ERROR] El archivo descargado no contiene funciones válidas.
+    del "%TEMP_FILE%" >nul 2>&1
+    timeout /t 3 >nul
     goto :Continue
 )
 
-:: Comparar los archivos
+:: Comparar con el archivo actual
 fc /b "%TEMP_FILE%" "%LOCAL_FILE%" >nul
 if errorlevel 1 (
     echo [INFO] Se encontró una nueva versión. Ejecutando nueva versión...
@@ -35,7 +38,6 @@ if errorlevel 1 (
 
 :Continue
 echo.
-
 
 :: ------------------------- ENTRADA DE USUARIO Y CLAVE -------------------------
 echo ============================================================================
