@@ -10,14 +10,21 @@ set "UPDATE_URL=https://raw.githubusercontent.com/Liadev-op/actualizador-bat/mai
 set "LOCAL_FILE=%~f0"
 set "TEMP_FILE=%TEMP%\actualizacion_redes.bat"
 
-:: Verificar y descargar nueva versión
+:: Descargar nueva versión del script a archivo temporal
 echo Verificando actualizaciones...
-powershell -Command "try { Invoke-WebRequest -Uri '%UPDATE_URL%' -OutFile '%TEMP_FILE%' -ErrorAction Stop } catch { exit 1 }"
+powershell -Command "try { Invoke-WebRequest -Uri '%UPDATE_URL%' -OutFile '%TEMP_FILE%' -UseBasicParsing -ErrorAction Stop } catch { Write-Host '[ERROR] No se pudo descargar la nueva versión.'; exit 1 }"
 
-:: Comparar con archivo actual
+:: Validar que se haya descargado correctamente
+if not exist "%TEMP_FILE%" (
+    echo [ERROR] No se pudo descargar el archivo actualizado.
+    timeout /t 5 >nul
+    goto :Continue
+)
+
+:: Comparar los archivos
 fc /b "%TEMP_FILE%" "%LOCAL_FILE%" >nul
 if errorlevel 1 (
-    echo [INFO] Se encontró una nueva versión. Ejecutando la nueva versión temporal...
+    echo [INFO] Se encontró una nueva versión. Ejecutando nueva versión...
     timeout /t 2 >nul
     start "" "%TEMP_FILE%"
     exit /b
@@ -25,7 +32,10 @@ if errorlevel 1 (
     del "%TEMP_FILE%" >nul 2>&1
     echo [INFO] El script está actualizado.
 )
+
+:Continue
 echo.
+
 
 :: ------------------------- ENTRADA DE USUARIO Y CLAVE -------------------------
 echo ============================================================================
