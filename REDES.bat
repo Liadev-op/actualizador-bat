@@ -99,21 +99,23 @@ set "PASS=%~4"
 
 echo Mapeando %DRIVE% -> %SHARE% ...
 
-:: Ejecutar el comando y capturar salida
-net use %DRIVE% %SHARE% %PASS% /user:%USER% /persistent:yes >"%TEMP%\netuse_output.txt" 2>&1
-set "ERRORCODE=%ERRORLEVEL%"
+:: Ejecutar net use y capturar salida en variable temporal
+for /f "usebackq delims=" %%A in (`net use %DRIVE% %SHARE% %PASS% /user:%USER% /persistent:yes 2^>^&1`) do (
+    set "NETUSE_OUTPUT=%%A"
+)
 
-if %ERRORCODE% neq 0 (
-    echo [ERROR] No se pudo mapear %DRIVE% (%SHARE%)
-    type "%TEMP%\netuse_output.txt"
+:: Buscar palabras clave de error en la salida
+echo !NETUSE_OUTPUT! | findstr /i "denegado incorrecto error" >nul
+if !errorlevel! equ 0 (
+    echo [ERROR] No se pudo mapear %DRIVE% (%SHARE%): !NETUSE_OUTPUT!
     set "FAILED_DRIVES=!FAILED_DRIVES! %DRIVE%"
 ) else (
     echo [OK] %DRIVE% mapeado correctamente.
     set "SUCCESS_DRIVES=!SUCCESS_DRIVES! %DRIVE%"
 )
 
-del "%TEMP%\netuse_output.txt" >nul 2>&1
 exit /b
+
 
 
 :InputPassword
