@@ -4,17 +4,26 @@ Title Mapeo de Unidades de Red - DAIKIN
 Mode 80,20 & Color 0A
 cls
 
+:: ------------------------- VERIFICACIÓN DE ADMINISTRADOR -------------------------
+net session >nul 2>&1
+if %errorLevel% neq 0 (
+    echo Requiere privilegios de administrador. Reiniciando como administrador...
+    powershell -Command "Start-Process '%~f0' -Verb RunAs"
+    exit /b
+)
+
 :: ------------------------- CONFIGURACIÓN DE ACTUALIZACIÓN -------------------------
-:: Reemplaza esta URL con el enlace directo de la versión más reciente del script
 set "UPDATE_URL=https://raw.githubusercontent.com/Liadev-op/actualizador-bat/refs/heads/main/REDES.bat"
 set "LOCAL_FILE=%~f0"
 set "TEMP_FILE=%TEMP%\actualizacion_redes.bat"
 
-:: Verificar y descargar nueva versión
 echo Verificando actualizaciones...
 powershell -Command "try { Invoke-WebRequest -Uri '%UPDATE_URL%' -OutFile '%TEMP_FILE%' -ErrorAction Stop } catch { exit 1 }"
+if %ERRORLEVEL% neq 0 (
+    echo [ERROR] No se pudo verificar la actualización. Continuando con la versión actual...
+    goto continue
+)
 
-:: Comparar con archivo actual
 fc /b "%TEMP_FILE%" "%LOCAL_FILE%" >nul
 if errorlevel 1 (
     echo [INFO] Se encontró una nueva versión. Actualizando...
@@ -28,8 +37,9 @@ if errorlevel 1 (
     del "%TEMP_FILE%" >nul 2>&1
     echo [INFO] El script está actualizado.
 )
-echo.
 
+:continue
+echo.
 :: ------------------------- ENTRADA DE USUARIO Y CLAVE -------------------------
 echo ============================================================================
 echo                UTILIDAD PARA MAPEAR UNIDADES DE RED DAIKIN
@@ -57,7 +67,10 @@ call :MapDrive "i:" "\\dargnas\it" "dargnas\usuarios" "s875wp11"
 call :MapDrive "x:" "\\dargnas\g" "dargnas\usuarios" "s875wp11"
 
 echo.
-echo [FIN] Todas las unidades han sido procesadas.
+echo ============================================================================
+echo                Todas las unidades fueron mapeadas correctamente
+echo ============================================================================
+echo.
 pause
 exit /b
 
@@ -70,10 +83,11 @@ set "USER=%~3"
 set "PASS=%~4"
 
 echo Mapeando %DRIVE% -> %SHARE% ...
-net use %DRIVE% %SHARE% %PASS% /user:%USER% /persistent:yes >nul 2>&1
-
+net use %DRIVE% %SHARE% %PASS% /user:%USER% /persistent:yes >nul 2>nul
 if errorlevel 1 (
     echo [ERROR] No se pudo mapear %DRIVE% (%SHARE%)
+    echo [INFO] Detalles del error:
+    net use %DRIVE% %SHARE% %PASS% /user:%USER% /persistent:yes
 ) else (
     echo [OK] %DRIVE% mapeado correctamente.
 )
