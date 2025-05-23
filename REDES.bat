@@ -54,7 +54,7 @@ call :MapDrive "w:" "\\SQLSRV\datossrv$\Waldbott" "darg\!U!" "!P!"
 call :MapDrive "y:" "\\SQLSRV\datossrv$\Alpha" "darg\!U!" "!P!"
 call :MapDrive "h:" "\\dargnas\discoh" "dargnas\usuarios" "s875wp11"
 call :MapDrive "i:" "\\dargnas\it" "dargnas\usuarios" "s875wp11"
-call :MapDrive "x:" "\\dargnas\g" "dargnas\nas" "Darg1430***"
+call :MapDrive "x:" "\\dargnas\g" "dargnas\nas" "S875wp11"
 
 echo.
 echo [FIN] Todas las unidades han sido procesadas.
