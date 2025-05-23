@@ -47,7 +47,7 @@ net use * /delete /y >nul 2>&1
 
 :: Agregar credenciales si es necesario (SQLSRV)
 cmdkey /add:sqlsrv /user:darg\!U! /pass:!P!
-
+net use x: /delete /y >nul 2>&1
 :: ------------------------- MAPEO DE UNIDADES -------------------------
 call :MapDrive "g:" "\\filesrv2\shared$" "usuarios" "Darg1430*"
 call :MapDrive "w:" "\\SQLSRV\datossrv$\Waldbott" "darg\!U!" "!P!"
