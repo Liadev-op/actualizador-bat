@@ -13,7 +13,12 @@ echo Verificando actualizaciones...
 
 :: Descargar archivo desde GitHub en texto plano
 powershell -NoProfile -ExecutionPolicy Bypass -Command ^
-    "try { (Invoke-WebRequest -Uri '%UPDATE_URL%' -UseBasicParsing).Content | Set-Content -Path '%TEMP_FILE%' -Encoding ASCII } catch { Write-Host '[ERROR] No se pudo descargar el archivo'; exit 1 }"
+"try { ^
+    $content = Invoke-WebRequest -Uri '%UPDATE_URL%' -UseBasicParsing -ErrorAction Stop; ^
+    $content.Content | Set-Content -Path '%TEMP_FILE%' -Encoding ASCII ^
+} catch { ^
+    Write-Host '[ERROR] No se pudo descargar el archivo actualizado.'; exit 1 ^
+}"
 
 :: Verificar que el archivo descargado tenga contenido válido
 findstr /B /C:":MapDrive" "%TEMP_FILE%" >nul
