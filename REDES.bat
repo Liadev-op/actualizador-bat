@@ -16,13 +16,18 @@ where powershell >nul 2>&1 || (
     pause
     exit /b
 )
-
-powershell -Command "try {
+powershell -Command ^
+"try {
     Invoke-WebRequest -Uri '%UPDATE_URL%' -OutFile '%TEMP_FILE%' -ErrorAction Stop
 } catch {
-    Write-Error 'No se pudo descargar la actualización del script.'
+    Write-Host '[ERROR] No se pudo descargar la actualización del script.' -ForegroundColor Red
     exit 1
-}"
+}" || (
+    echo [ERROR] Falló la conexión con el servidor. Verifica tu conexión o la URL.
+    pause
+    exit /b
+)
+
 
 fc /b "%TEMP_FILE%" "%LOCAL_FILE%" >nul
 if errorlevel 1 (
