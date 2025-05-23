@@ -5,7 +5,7 @@ Mode 80,20 & Color 0A
 cls
 
 :: ------------------------- CONFIGURACIÓN DE ACTUALIZACIÓN -------------------------
-:: Reemplaza esta URL con el enlace directo de la versión más reciente del script
+:: URL RAW directa del archivo en GitHub
 set "UPDATE_URL=https://raw.githubusercontent.com/Liadev-op/actualizador-bat/main/REDES.bat"
 set "LOCAL_FILE=%~f0"
 set "TEMP_FILE=%TEMP%\actualizacion_redes.bat"
@@ -17,12 +17,9 @@ powershell -Command "try { Invoke-WebRequest -Uri '%UPDATE_URL%' -OutFile '%TEMP
 :: Comparar con archivo actual
 fc /b "%TEMP_FILE%" "%LOCAL_FILE%" >nul
 if errorlevel 1 (
-    echo [INFO] Se encontró una nueva versión. Actualizando...
+    echo [INFO] Se encontró una nueva versión. Ejecutando la nueva versión temporal...
     timeout /t 2 >nul
-    copy /y "%TEMP_FILE%" "%LOCAL_FILE%" >nul
-    echo [OK] Script actualizado. Reiniciando...
-    timeout /t 2 >nul
-    start "" "%LOCAL_FILE%"
+    start "" "%TEMP_FILE%"
     exit /b
 ) else (
     del "%TEMP_FILE%" >nul 2>&1
@@ -45,9 +42,10 @@ call :InputPassword "Ingrese su contraseña" P
 :: Cerrar conexiones anteriores
 net use * /delete /y >nul 2>&1
 
-:: Agregar credenciales si es necesario (SQLSRV)
+:: Agregar credenciales si es necesario
 cmdkey /add:sqlsrv /user:darg\!U! /pass:!P!
 net use x: /delete /y >nul 2>&1
+
 :: ------------------------- MAPEO DE UNIDADES -------------------------
 call :MapDrive "g:" "\\filesrv2\shared$" "usuarios" "Darg1430*"
 call :MapDrive "w:" "\\SQLSRV\datossrv$\Waldbott" "darg\!U!" "!P!"
