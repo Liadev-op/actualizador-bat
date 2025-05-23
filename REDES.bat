@@ -6,7 +6,7 @@ cls
 
 :: ------------------------- CONFIGURACIÓN DE ACTUALIZACIÓN -------------------------
 :: Reemplaza esta URL con el enlace directo de la versión más reciente del script
-set "UPDATE_URL=https://raw.githubusercontent.com/Liadev-op/actualizador-bat/refs/heads/main/REDES.bat"
+set "https://raw.githubusercontent.com/Liadev-op/actualizador-bat/refs/heads/main/REDES.bat"
 set "LOCAL_FILE=%~f0"
 set "TEMP_FILE=%TEMP%\actualizacion_redes.bat"
 
@@ -54,7 +54,7 @@ call :MapDrive "w:" "\\SQLSRV\datossrv$\Waldbott" "darg\!U!" "!P!"
 call :MapDrive "y:" "\\SQLSRV\datossrv$\Alpha" "darg\!U!" "!P!"
 call :MapDrive "h:" "\\dargnas\discoh" "dargnas\usuarios" "s875wp11"
 call :MapDrive "i:" "\\dargnas\it" "dargnas\usuarios" "s875wp11"
-call :MapDrive "x:" "\\dargnas\g" "dargnas\nas" "Darg1430***"
+call :MapDrive "x:" "\\dargnas\g" "dargnas\usuarios" "s875wp11"
 
 echo.
 echo [FIN] Todas las unidades han sido procesadas.
@@ -83,5 +83,5 @@ exit /b
 set "psCommand=powershell -Command "$pword = read-host '%~1' -AsSecureString ; ^
 $BSTR = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($pword); ^
 [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($BSTR)""
-for /f "usebackq delims=" %%p in (%psCommand%) do set "%2=%%p"
+for /f "usebackq delims=" %%p in (`%psCommand%`) do set "%2=%%p"
 exit /b
