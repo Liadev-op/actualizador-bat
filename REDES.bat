@@ -6,7 +6,7 @@ cls
 
 :: ------------------------- CONFIGURACIÓN DE ACTUALIZACIÓN -------------------------
 :: Reemplaza esta URL con el enlace directo de la versión más reciente del script
-set "UPDATE_URL=https://tuservidor.com/scripts/redes.bat"
+set "https://raw.githubusercontent.com/Liadev-op/actualizador-bat/refs/heads/main/REDES.bat"
 set "LOCAL_FILE=%~f0"
 set "TEMP_FILE=%TEMP%\actualizacion_redes.bat"
 
