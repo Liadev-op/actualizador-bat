@@ -5,16 +5,25 @@ Mode 80,20 & Color 0A
 cls
 
 :: ------------------------- CONFIGURACIÓN DE ACTUALIZACIÓN -------------------------
-:: Reemplaza esta URL con el enlace directo de la versión más reciente del script
-set "https://raw.githubusercontent.com/Liadev-op/actualizador-bat/refs/heads/main/REDES.bat"
+set "UPDATE_URL=https://raw.githubusercontent.com/Liadev-op/actualizador-bat/refs/heads/main/REDES.bat"
 set "LOCAL_FILE=%~f0"
 set "TEMP_FILE=%TEMP%\actualizacion_redes.bat"
 
 :: Verificar y descargar nueva versión
 echo Verificando actualizaciones...
-powershell -Command "try { Invoke-WebRequest -Uri '%UPDATE_URL%' -OutFile '%TEMP_FILE%' -ErrorAction Stop } catch { exit 1 }"
+where powershell >nul 2>&1 || (
+    echo [ERROR] PowerShell no está disponible. No se puede actualizar el script.
+    pause
+    exit /b
+)
 
-:: Comparar con archivo actual
+powershell -Command "try {
+    Invoke-WebRequest -Uri '%UPDATE_URL%' -OutFile '%TEMP_FILE%' -ErrorAction Stop
+} catch {
+    Write-Error 'No se pudo descargar la actualización del script.'
+    exit 1
+}"
+
 fc /b "%TEMP_FILE%" "%LOCAL_FILE%" >nul
 if errorlevel 1 (
     echo [INFO] Se encontró una nueva versión. Actualizando...
@@ -38,14 +47,19 @@ echo.
 echo Nota: Su usuario es la primer parte de su correo de Daikin justo antes del "@".
 echo.
 
+:ValidarUsuario
 set /p U=Ingrese su usuario: 
+if "%U%"=="" (
+    echo [ERROR] El usuario no puede estar vacío.
+    goto ValidarUsuario
+)
 
 call :InputPassword "Ingrese su contraseña" P
 
 :: Cerrar conexiones anteriores
 net use * /delete /y >nul 2>&1
 
-:: Agregar credenciales si es necesario (SQLSRV)
+:: Agregar credenciales si es necesario
 cmdkey /add:sqlsrv /user:darg\!U! /pass:!P!
 
 :: ------------------------- MAPEO DE UNIDADES -------------------------
@@ -58,6 +72,11 @@ call :MapDrive "x:" "\\dargnas\g" "dargnas\nas" "Darg1430***"
 
 echo.
 echo [FIN] Todas las unidades han sido procesadas.
+
+:: Limpiar variables sensibles
+set "P="
+set "U="
+
 pause
 exit /b
 
@@ -71,6 +90,7 @@ set "PASS=%~4"
 
 echo Mapeando %DRIVE% -> %SHARE% ...
 net use %DRIVE% %SHARE% %PASS% /user:%USER% /persistent:yes >nul 2>&1
+REM net use %DRIVE% %SHARE% %PASS% /user:%USER% /persistent:yes >> mapeo_log.txt 2>&1
 
 if errorlevel 1 (
     echo [ERROR] No se pudo mapear %DRIVE% (%SHARE%)
